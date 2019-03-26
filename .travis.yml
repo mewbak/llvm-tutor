@@ -14,3 +14,4 @@ addons:
 script:
   - clang-8 -v
   - ls /usr/bin/
+  - find /usr/ -name LLVMConfig.cmake
