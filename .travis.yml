@@ -11,6 +11,7 @@ addons:
     packages:
       - llvm-8
       - clang-8
+      - llvm-8-dev
 script:
   - clang-8 -v
   - ls /usr/bin/
