@@ -8,6 +8,30 @@
 // DESCRIPTION:
 //    Implements counting of dynamic function calls.
 //
+//    This a module pass that:
+//     1. Inserts a global variable, lt_RUNTIME_numFunctions, that stores the
+//        number of functions in the module:
+//          extern uint64_t lt_RUNTIME_numFunctions;
+//     2. Inserts a global array of structs, lt_RUNTIME_functionInfo, in which
+//        there's one element per each function in the module that contains the
+//        number of times each function is called:
+//          struct {
+//            char *name;
+//            uint64_t count;
+//          } lt_RUNTIME_functionInfo[];
+//     3. Declares the counter function:
+//          void lt_RUNTIME_called(uint64_t id)
+//     4. Declares the function printing the results of the analysis:
+//          void lt_RUNTIME_print()
+//        This function will use the contents of lt_RUNTIME_functionInfo. It's
+//        installed with other destructor to guarantee that it's executed at
+//        the end of the module.
+//     5. For each function defined in this module, inserts a call to
+//        lt_RUNTIME_called at the beginning of each funciton
+//     6. For each call to an externally defined function, inserts a call to
+//        lt_RUNTIME_called just before the call site instruction (we can't
+//        instrument externally defined functions).
+//
 // License: MIT
 //========================================================================
 #include "DynamicCallCounter.h"
@@ -119,10 +143,10 @@ bool DynamicCallCounter::runOnModule(Module &m) {
   // 3. Create a global table of function infos
   createGlobalFunctionTable(m, numFunctions);
 
-  // 4. Declare the counter function.
+  // 4. Declare the counter function
   auto *voidTy = Type::getVoidTy(context);
   auto *helperTy = FunctionType::get(voidTy, int64Ty, false);
-  auto *counter = m.getOrInsertFunction("lt_RUNTIME_called", helperTy);
+  auto *counterFunc = m.getOrInsertFunction("lt_RUNTIME_called", helperTy);
 
   // 5. Declare and install the result printing function so that it prints out
   // the counts after the entire program is finished executing.
@@ -135,13 +159,16 @@ bool DynamicCallCounter::runOnModule(Module &m) {
       continue;
     }
 
-    // Count each internal function as it executes.
-    installCCFunction(*f, counter);
+    // Count each internal function. To this end install a call to
+    // lt_RUNTIME_called at the beginning of such function.
+    installCCFunction(*f, counterFunc);
 
-    // Count each external function as it is called.
+    // Count each external function. To this end loop over all instructions in
+    // this function and for each function call insert a call to
+    // lt_RUNTIME_called just before the call-site instruction.
     for (auto &bb : *f) {
       for (auto &i : bb) {
-        installCCInstruction(CallSite(&i), counter);
+        installCCInstruction(CallSite(&i), counterFunc);
       }
     }
   }
