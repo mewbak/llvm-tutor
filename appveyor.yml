@@ -32,9 +32,6 @@ before_build:
     dir
 
 build:
-  project: $(APPVEYOR_BUILD_FOLDER)\_build\cpp-tutor.sln
+  project: $(APPVEYOR_BUILD_FOLDER)\_build\llvm-tutor.sln
   verbosity: minimal
   parallel: true
-
-test_script:
-  - '%APPVEYOR_BUILD_FOLDER%\_build\%CONFIGURATION%\cppTutorUT.exe'
