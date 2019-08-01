@@ -28,6 +28,13 @@ init:
 
 before_build:
 - cmd: |-
+    git clone https://github.com/llvm-mirror/llvm.git
+    cd llvm
+    git checkout release_80
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build . --config Release --target INSTALL
     choco install llvm
     dir "C:\Program Files\LLVM"
     dir "C:\Program Files\LLVM\include"
