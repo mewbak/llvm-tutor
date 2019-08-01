@@ -29,6 +29,7 @@ init:
 before_build:
 - cmd: |-
     choco install llvm
+    dir "C:\Program Files\LLVM"
     dir "C:\Program Files\LLVM\bin"
 
 build:
