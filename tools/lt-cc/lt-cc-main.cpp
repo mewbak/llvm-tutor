@@ -261,11 +261,8 @@ static void countDynamicCalls(Module &m) {
     exit(-1);
   }
 
-  // 2. Initialize all the targets for emitting object code.
-  InitializeAllTargets();
-  InitializeAllTargetMCs();
-  InitializeAllAsmPrinters();
-  InitializeAllAsmParsers();
+  // 2. Initialize the host/native target for emitting object code.
+  InitializeNativeTarget();
   // cl::AddExtraVersionPrinter(TargetRegistry::printRegisteredTargetsForVersion);
 
   // 3. Build up and run all of the passes that we want for the input module.

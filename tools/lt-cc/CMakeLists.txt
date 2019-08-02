@@ -7,7 +7,11 @@ add_executable(lt-cc
   lt-cc-main.cpp
 )
 
-llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LLVM_TARGETS_TO_BUILD}
+message("LLVM_TARGETS_TO_BUILD = ${LLVM_TARGETS_TO_BUILD}")
+message("LT_LLVM_TARGETS = ${LT_LLVM_TARGETS}")
+message("CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
+
+llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LT_LLVM_TARGETS}
         asmparser
         core
         linker

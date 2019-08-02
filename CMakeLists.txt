@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4.3)
 project(llvm-tutor)
 
 set(PACKAGE_NAME lt-cc)
-set(PACKAGE_VERSION 0.1)
+set(PACKAGE_VERSION 0.2)
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 
 #===============================================================================
@@ -16,6 +16,10 @@ set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 # Set this to a valid LLVM installation dir
 set(LT_LIT_TOOLS_DIR "" CACHE PATH "The location of tools required for testing
 with LIT (FileCheck, not, count)")
+
+# Set this to a valid LLVM target (X86 in most cases).
+set(LT_LLVM_TARGETS "" CACHE STRING "The target for which to build LT. Defaults
+to LLVM_TARGETS_TO_BUILD.")
 
 # A bit of a sanity checking
 set(LT_LLVM_INCLUDE_DIR "${LT_LLVM_INSTALL_DIR}/include/llvm")
@@ -109,6 +113,10 @@ add_definitions(${LLVM_DEFINITIONS})
 # Finally, add targets. Doing this at the end so that all definitions and
 # link/include paths are available for the sub-projects.
 #===============================================================================
+if (NOT LT_LLVM_TARGETS)
+  set(LT_LLVM_TARGETS ${LLVM_TARGETS_TO_BUILD})
+endif()
+
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(test)
