@@ -3,6 +3,13 @@ version: '1.0.{build}'
 platform:
   - x64
 
+install:
+  # Download ninja
+  - cmd: mkdir C:\ninja-build
+  - ps: (new-object net.webclient).DownloadFile('https://github.com/mesonbuild/cidata/raw/master/ninja.exe', 'C:\ninja-build\ninja.exe')
+  - cmd: set PATH=C:\ninja-build;%PATH%
+
+
 clone_folder: c:\projects\llvm-tutor
 image:
 - Visual Studio 2017
@@ -33,14 +40,16 @@ before_build:
     git checkout release_80
     mkdir build
     cd build
-    cmake -DLLVM_TARGETS_TO_BUILD=X86 ..
-    cmake --build . --config Release --target INSTALL
-    choco install llvm
-    dir "C:\Program Files\LLVM"
-    dir "C:\Program Files\LLVM\include"
-    dir "C:\Program Files\LLVM\lib"
-    dir "C:\Program Files\LLVM\share"
-    dir "C:\Program Files\LLVM\bin"
+    # cmake -DLLVM_TARGETS_TO_BUILD=X86 ..
+    cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 ..
+    ninja
+    # cmake --build . --config Release --target INSTALL
+    # choco install llvm
+    # dir "C:\Program Files\LLVM"
+    # dir "C:\Program Files\LLVM\include"
+    # dir "C:\Program Files\LLVM\lib"
+    # dir "C:\Program Files\LLVM\share"
+    # dir "C:\Program Files\LLVM\bin"
 
 build:
   project: $(APPVEYOR_BUILD_FOLDER)\_build\llvm-tutor.sln
